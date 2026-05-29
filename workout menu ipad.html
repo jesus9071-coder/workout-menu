@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="朝トレ">
+<meta name="theme-color" content="#0f1117">
+<title>朝トレメニュー</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Oswald:wght@600&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22263a;
+    --border: rgba(255,255,255,0.08);
+    --text: #f0f2ff;
+    --muted: rgba(240,242,255,0.45);
+    --accent-blue: #4f9cf9;
+    --accent-green: #3ecf8e;
+    --accent-amber: #f5a623;
+    --accent-pink: #f06292;
+    --accent-purple: #a78bfa;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* iPad レイアウト */
+  .app-wrapper {
+    max-width: 1024px;
+    margin: 0 auto;
+  }
+
+  @media (min-width: 768px) {
+    .header { padding: 40px 40px 28px; }
+    .header-title { font-size: 36px; }
+    .header-sub { font-size: 14px; }
+    .weight-badge { font-size: 16px; padding: 8px 20px; }
+    .tabs { padding: 20px 40px 0; gap: 16px; }
+    .tab { font-size: 16px; padding: 14px 0; }
+    .panel { padding: 24px 40px 0; }
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .content-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    .day-section { margin-bottom: 0; }
+    .yt-section { margin-bottom: 0; }
+    .ex-name { font-size: 16px; }
+    .ex-detail { font-size: 13px; }
+    .ex-kcal { font-size: 15px; }
+    .yt-name { font-size: 15px; }
+    .yt-sub { font-size: 13px; }
+    .yt-icon { width: 44px; height: 44px; }
+    .day-title { font-size: 16px; }
+    .total-kcal { font-size: 22px; }
+    .rule-text { font-size: 15px; }
+    .goal-grid { grid-template-columns: repeat(4, 1fr); }
+    .goal-value { font-size: 28px; }
+    .section-spacer { margin-bottom: 20px; }
+  }
+
+  @media (min-width: 1024px) {
+    .header { padding: 48px 60px 32px; }
+    .tabs { padding: 20px 60px 0; }
+    .panel { padding: 28px 60px 0; }
+  }
+
+  /* header */
+  .header {
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+    padding: 52px 20px 24px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(79,156,249,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+  .header-title {
+    font-family: 'Oswald', sans-serif;
+    font-size: 26px;
+    letter-spacing: 2px;
+    color: var(--text);
+  }
+  .header-sub {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+  .weight-badge {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .weight-badge span { color: var(--accent-green); font-weight: 700; }
+
+  /* tabs */
+  .tabs {
+    display: flex;
+    padding: 16px 20px 0;
+    gap: 10px;
+    background: var(--bg);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 0;
+    border: none;
+    border-radius: 10px 10px 0 0;
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'Noto Sans JP', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .tab.active {
+    background: var(--surface2);
+    color: var(--text);
+    border-bottom: 2px solid var(--accent-blue);
+  }
+  .tab svg { width: 16px; height: 16px; }
+
+  /* panels */
+  .panel { display: none; padding: 16px 16px 0; }
+  .panel.active { display: block; }
+
+  /* day section */
+  .day-section {
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .day-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .day-dots {
+    display: flex;
+    gap: 4px;
+  }
+  .day-dot {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .day-title {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .time-badge {
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  /* exercise row */
+  .ex-row {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .ex-row:last-child { border-bottom: none; }
+  .ex-num {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+  .ex-info { flex: 1; }
+  .ex-name {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+  .ex-detail {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .ex-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+  .ex-kcal {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-amber);
+  }
+  .ex-time {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .ex-tag {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+
+  /* total bar */
+  .total-bar {
+    background: var(--surface2);
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .total-label { font-size: 12px; color: var(--muted); }
+  .total-kcal { font-size: 18px; font-weight: 700; color: var(--accent-amber); }
+
+  /* youtube links */
+  .yt-section {
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .yt-header {
+    padding: 10px 16px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 1px;
+    border-bottom: 1px solid var(--border);
+  }
+  .yt-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+  .yt-link:last-child { border-bottom: none; }
+  .yt-link:active { background: var(--surface2); }
+  .yt-icon {
+    width: 36px; height: 36px;
+    background: #ff0000;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .yt-icon svg { width: 18px; height: 18px; fill: white; }
+  .yt-info { flex: 1; }
+  .yt-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .yt-sub { font-size: 11px; color: var(--muted); }
+  .yt-arrow { color: var(--muted); font-size: 18px; }
+
+  /* rules */
+  .rule-row {
+    padding: 10px 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .rule-row:last-child { border-bottom: none; }
+  .rule-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent-pink);
+    flex-shrink: 0;
+    margin-top: 5px;
+  }
+  .rule-text { font-size: 13px; line-height: 1.6; }
+
+  /* goals */
+  .goal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 16px;
+  }
+  .goal-card {
+    background: var(--surface);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    padding: 14px 14px;
+    text-align: center;
+  }
+  .goal-label { font-size: 11px; color: var(--muted); margin-bottom: 4px; }
+  .goal-value { font-size: 22px; font-weight: 700; }
+  .goal-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header-title">朝トレメニュー</div>
+      <div class="header-sub">DAILY WORKOUT PLAN</div>
+    </div>
+    <div class="weight-badge">目標 <span>64kg</span></div>
+  </div>
+</div>
+
+<div class="app-wrapper">
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('home', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+    自宅（バイクあり）
+  </button>
+  <button class="tab" onclick="switchTab('travel', this)">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/></svg>
+    出張先（バイクなし）
+  </button>
+</div>
+
+<!-- 自宅パネル -->
+<div id="home" class="panel active">
+<div class="content-grid section-spacer">
+  <!-- 月水金 -->
+  <div class="day-section">
+    <div class="day-header" style="background: rgba(79,156,249,0.08);">
+      <div class="day-dots">
+        <div class="day-dot" style="background:rgba(79,156,249,0.2); color:#4f9cf9;">月</div>
+        <div class="day-dot" style="background:rgba(79,156,249,0.2); color:#4f9cf9;">水</div>
+        <div class="day-dot" style="background:rgba(79,156,249,0.2); color:#4f9cf9;">金</div>
+      </div>
+      <div class="day-title">脂肪燃焼強化</div>
+      <div class="time-badge" style="background:rgba(79,156,249,0.15); color:#4f9cf9;">約50分</div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">1</div>
+      <div class="ex-info">
+        <div class="ex-name">ST145 スピンバイク</div>
+        <div class="ex-detail">RPM 70-80 ／ 心拍 120-130<br>負荷ノブ 時計回り2〜3回転</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">有酸素</span>
+        <div class="ex-kcal">〜220 kcal</div>
+        <div class="ex-time">30分</div>
+      </div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(245,166,35,0.15); color:#f5a623;">2</div>
+      <div class="ex-info">
+        <div class="ex-name">ひなちゃんねる</div>
+        <div class="ex-detail">下腹部痩せ ／ 洋ナシ型の弱点を直撃<br>皮下脂肪ピンポイント攻略</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(245,166,35,0.15); color:#f5a623;">腹筋</span>
+        <div class="ex-kcal">〜80 kcal</div>
+        <div class="ex-time">13分</div>
+      </div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(167,139,250,0.15); color:#a78bfa;">3</div>
+      <div class="ex-info">
+        <div class="ex-name">ストレッチ</div>
+        <div class="ex-detail">下半身中心 ／ 洋ナシ型は<br>体を冷やさないことが最重要</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(167,139,250,0.15); color:#a78bfa;">回復</span>
+        <div class="ex-kcal">〜20 kcal</div>
+        <div class="ex-time">5分</div>
+      </div>
+    </div>
+    <div class="total-bar">
+      <div class="total-label">合計消費カロリー</div>
+      <div class="total-kcal">約 320 kcal</div>
+    </div>
+  </div>
+
+  <!-- 火木 -->
+  <div class="day-section">
+    <div class="day-header" style="background: rgba(240,98,146,0.08);">
+      <div class="day-dots">
+        <div class="day-dot" style="background:rgba(240,98,146,0.2); color:#f06292;">火</div>
+        <div class="day-dot" style="background:rgba(240,98,146,0.2); color:#f06292;">木</div>
+      </div>
+      <div class="day-title">全身引き締め</div>
+      <div class="time-badge" style="background:rgba(240,98,146,0.15); color:#f06292;">約40分</div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">1</div>
+      <div class="ex-info">
+        <div class="ex-name">ST145 スピンバイク</div>
+        <div class="ex-detail">同強度でOK</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">有酸素</span>
+        <div class="ex-kcal">〜220 kcal</div>
+        <div class="ex-time">30分</div>
+      </div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(240,98,146,0.15); color:#f06292;">2</div>
+      <div class="ex-info">
+        <div class="ex-name">カズハルーティン</div>
+        <div class="ex-detail">全身痩せ ／ 30秒×全身種目<br>楽しく継続が最大の武器</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(240,98,146,0.15); color:#f06292;">全身</span>
+        <div class="ex-kcal">〜60 kcal</div>
+        <div class="ex-time">8分</div>
+      </div>
+    </div>
+    <div class="total-bar">
+      <div class="total-label">合計消費カロリー</div>
+      <div class="total-kcal">約 280 kcal</div>
+    </div>
+  </div>
+
+  <!-- 土 -->
+  <div class="day-section">
+    <div class="day-header" style="background: rgba(167,139,250,0.08);">
+      <div class="day-dots">
+        <div class="day-dot" style="background:rgba(167,139,250,0.2); color:#a78bfa;">土</div>
+      </div>
+      <div class="day-title">週末フル強化</div>
+      <div class="time-badge" style="background:rgba(167,139,250,0.15); color:#a78bfa;">約55分</div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">1</div>
+      <div class="ex-info">
+        <div class="ex-name">ST145 スピンバイク</div>
+        <div class="ex-detail">負荷ノブ +1回転UP ／ 強度上げる日</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">有酸素</span>
+        <div class="ex-kcal">〜240 kcal</div>
+        <div class="ex-time">30分</div>
+      </div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(245,166,35,0.15); color:#f5a623;">2</div>
+      <div class="ex-info">
+        <div class="ex-name">きんにくTV — HIIT</div>
+        <div class="ex-detail">世界最速 ／ アフターバーン効果最大化<br>洋ナシ型の皮下脂肪に特に有効</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(245,166,35,0.15); color:#f5a623;">HIIT</span>
+        <div class="ex-kcal">〜70 kcal</div>
+        <div class="ex-time">8分</div>
+      </div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(245,166,35,0.15); color:#f5a623;">3</div>
+      <div class="ex-info">
+        <div class="ex-name">ひなちゃんねる</div>
+        <div class="ex-detail">週の仕上げ ／ 腹部集中</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(245,166,35,0.15); color:#f5a623;">腹筋</span>
+        <div class="ex-kcal">〜80 kcal</div>
+        <div class="ex-time">13分</div>
+      </div>
+    </div>
+    <div class="total-bar">
+      <div class="total-label">合計消費カロリー</div>
+      <div class="total-kcal">約 390 kcal</div>
+    </div>
+  </div>
+
+  <!-- 日 -->
+  <div class="day-section">
+    <div class="day-header">
+      <div class="day-dots">
+        <div class="day-dot" style="background:rgba(255,255,255,0.08); color:var(--muted);">日</div>
+      </div>
+      <div class="day-title" style="color:var(--muted);">完全休養日</div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-info">
+        <div class="ex-detail" style="font-size:13px;">ストレッチ・入浴のみ。体を回復させることも筋肉づくりの一部です。入浴は湯船に15分（洋ナシ型は体を温めることが重要）</div>
+      </div>
+    </div>
+  </div>
+</div><!-- end content-grid -->
+
+<div class="content-grid section-spacer">
+  <div class="yt-section">
+    <div class="yt-header">筋トレ動画</div>
+    <a href="https://www.youtube.com/watch?v=hMgcaYd2BZM&t=375s" class="yt-link">
+      <div class="yt-icon"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">ひなちゃんねる — 下腹部痩せ</div>
+        <div class="yt-sub">月・水・金・土 ／ 13分</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+    <a href="https://www.youtube.com/watch?v=ckQah7rYqaw" class="yt-link">
+      <div class="yt-icon"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">カズハルーティン — 全身痩せ</div>
+        <div class="yt-sub">火・木 ／ 8分</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+    <a href="https://www.youtube.com/watch?v=jzUlLi6JFVA" class="yt-link">
+      <div class="yt-icon"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">きんにくTV — 世界最速HIIT</div>
+        <div class="yt-sub">土 ／ 8分</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+  </div>
+
+  <div class="yt-section">
+    <div class="yt-header">ストレッチ動画</div>
+    <a href="https://www.youtube.com/watch?v=n6zQZzBEb6U" class="yt-link">
+      <div class="yt-icon" style="background:#1a8a5a;"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">ひなちゃんねる — 代謝爆上げストレッチ ⭐️メイン</div>
+        <div class="yt-sub">筋トレ効果倍増・消費カロリーUP ／ 自宅日</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+    <a href="https://www.youtube.com/watch?v=G5pQcKoZ1Yw" class="yt-link">
+      <div class="yt-icon" style="background:#1a8a5a;"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">なるねぇ — 痩せる朝ストレッチ（3分）</div>
+        <div class="yt-sub">時間ない朝・出張先 ／ 3分で完結</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+    <a href="https://www.youtube.com/watch?v=BvLf9zxkTwM" class="yt-link">
+      <div class="yt-icon" style="background:#1a8a5a;"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">なるねぇ — 朝ストレッチ・1日中脂肪燃焼</div>
+        <div class="yt-sub">代謝UP・脂肪燃焼 ／ 余裕ある朝</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+    <a href="https://www.youtube.com/watch?v=BMB3qQPJw6g" class="yt-link">
+      <div class="yt-icon" style="background:#1a8a5a;"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">トレぴな — 朝ストレッチ・全身痩せ</div>
+        <div class="yt-sub">代謝UP・痩せる体づくり ／ 気分で変える日</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+  </div>
+
+  <!-- 目標 -->
+  <div class="goal-grid">
+    <div class="goal-card">
+      <div class="goal-label">現在の体重</div>
+      <div class="goal-value" style="color:#f5a623;">71.5<span style="font-size:14px;">kg</span></div>
+      <div class="goal-sub">体脂肪 28.1%</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-label">3ヶ月目標</div>
+      <div class="goal-value" style="color:#3ecf8e;">67<span style="font-size:14px;">kg</span></div>
+      <div class="goal-sub">体脂肪 25%</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-label">最終目標</div>
+      <div class="goal-value" style="color:#4f9cf9;">62<span style="font-size:14px;">kg</span></div>
+      <div class="goal-sub">体脂肪 20%</div>
+    </div>
+    <div class="goal-card">
+      <div class="goal-label">体内年齢目標</div>
+      <div class="goal-value" style="color:#a78bfa;">38<span style="font-size:14px;">歳</span></div>
+      <div class="goal-sub">現在 44歳</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- 出張パネル -->
+<div id="travel" class="panel">
+
+<div class="content-grid section-spacer">
+  <div class="day-section">
+    <div class="day-header" style="background: rgba(62,207,142,0.08);">
+      <div class="day-title">朝トレ（ホテル）</div>
+      <div class="time-badge" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">毎朝 約15分</div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">1</div>
+      <div class="ex-info">
+        <div class="ex-name">カズハルーティン</div>
+        <div class="ex-detail">全身 ／ 床のみ ／ スペース不要<br>音楽でテンション上げる</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">全身</span>
+        <div class="ex-kcal">〜60 kcal</div>
+        <div class="ex-time">8分</div>
+      </div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(245,166,35,0.15); color:#f5a623;">2</div>
+      <div class="ex-info">
+        <div class="ex-name">ひなちゃんねる（前半のみ）</div>
+        <div class="ex-detail">t=375s から再生 ／ 下腹部集中パート<br>時間がない朝でも6分でOK</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(245,166,35,0.15); color:#f5a623;">腹筋</span>
+        <div class="ex-kcal">〜40 kcal</div>
+        <div class="ex-time">6分</div>
+      </div>
+    </div>
+    <div class="total-bar">
+      <div class="total-label">合計消費カロリー</div>
+      <div class="total-kcal">約 100 kcal</div>
+    </div>
+  </div>
+
+  <div class="day-section">
+    <div class="day-header" style="background: rgba(167,139,250,0.08);">
+      <div class="day-title">追加オプション（余裕ある朝）</div>
+      <div class="time-badge" style="background:rgba(167,139,250,0.15); color:#a78bfa;">+10分</div>
+    </div>
+    <div class="ex-row">
+      <div class="ex-num" style="background:rgba(167,139,250,0.15); color:#a78bfa;">+</div>
+      <div class="ex-info">
+        <div class="ex-name">ホテル筋トレ3種</div>
+        <div class="ex-detail">スクワット 20回×3セット<br>腕立て伏せ 15回×3セット<br>プランク 30秒×3セット</div>
+      </div>
+      <div class="ex-right">
+        <span class="ex-tag" style="background:rgba(167,139,250,0.15); color:#a78bfa;">筋トレ</span>
+        <div class="ex-kcal">〜50 kcal</div>
+        <div class="ex-time">10分</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 飲み会ルール -->
+  <div class="day-section">
+    <div class="day-header" style="background: rgba(240,98,146,0.08);">
+      <div class="day-title">飲み会・会食 鉄則</div>
+      <div class="time-badge" style="background:rgba(240,98,146,0.15); color:#f06292;">出張の本丸</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-dot"></div>
+      <div class="rule-text">ビール1杯 → 焼酎水割り・ハイボールに即切り替え</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-dot"></div>
+      <div class="rule-text">食べる順番：刺身・枝豆 → 焼き鳥（塩） → 揚げ物は最後</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-dot"></div>
+      <div class="rule-text">揚げ物・クリーム系を避ける（洋ナシ型 DNAの最大の敵）</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-dot"></div>
+      <div class="rule-text">シメのラーメン・ご飯は断る（即 +0.5〜1kg）</div>
+    </div>
+    <div class="rule-row">
+      <div class="rule-dot"></div>
+      <div class="rule-text">帰ったら水500ml飲んで寝る</div>
+    </div>
+  </div>
+
+  <!-- お酒チートシート -->
+  <div class="day-section">
+    <div class="day-header" style="background: rgba(79,156,249,0.08);">
+      <div class="day-title">お酒チートシート</div>
+    </div>
+    <div class="ex-row">
+      <div style="width:8px;height:8px;border-radius:50%;background:#3ecf8e;flex-shrink:0;"></div>
+      <div class="ex-info"><div class="ex-name" style="font-size:13px;">焼酎水割り・ハイボール</div><div class="ex-detail">糖質ゼロ ／ 最優秀</div></div>
+      <span class="ex-tag" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">✓ OK</span>
+    </div>
+    <div class="ex-row">
+      <div style="width:8px;height:8px;border-radius:50%;background:#3ecf8e;flex-shrink:0;"></div>
+      <div class="ex-info"><div class="ex-name" style="font-size:13px;">赤ワイン</div><div class="ex-detail">ポリフェノール効果あり</div></div>
+      <span class="ex-tag" style="background:rgba(62,207,142,0.15); color:#3ecf8e;">✓ OK</span>
+    </div>
+    <div class="ex-row">
+      <div style="width:8px;height:8px;border-radius:50%;background:#f5a623;flex-shrink:0;"></div>
+      <div class="ex-info"><div class="ex-name" style="font-size:13px;">ビール</div><div class="ex-detail">糖質高い ／ 1杯まで</div></div>
+      <span class="ex-tag" style="background:rgba(245,166,35,0.15); color:#f5a623;">△ 1杯</span>
+    </div>
+    <div class="ex-row">
+      <div style="width:8px;height:8px;border-radius:50%;background:#f06292;flex-shrink:0;"></div>
+      <div class="ex-info"><div class="ex-name" style="font-size:13px;">日本酒・梅酒・甘いチューハイ</div><div class="ex-detail">糖質＋中性脂肪に直撃</div></div>
+      <span class="ex-tag" style="background:rgba(240,98,146,0.15); color:#f06292;">✗ NG</span>
+    </div>
+  </div>
+
+  <!-- YouTube links 出張 -->
+</div><!-- end content-grid -->
+
+<div class="content-grid section-spacer">
+  <div class="yt-section">
+    <div class="yt-header">筋トレ動画（出張用）</div>
+    <a href="https://www.youtube.com/watch?v=ckQah7rYqaw" class="yt-link">
+      <div class="yt-icon"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">カズハルーティン — 全身痩せ</div>
+        <div class="yt-sub">毎朝 ／ 8分 ／ 床のみ</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+    <a href="https://www.youtube.com/watch?v=hMgcaYd2BZM&t=375s" class="yt-link">
+      <div class="yt-icon"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">ひなちゃんねる（前半のみ）</div>
+        <div class="yt-sub">t=375s から ／ 6分 ／ 下腹部集中</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+  </div>
+
+  <div class="yt-section">
+    <div class="yt-header">ストレッチ動画（出張用）</div>
+    <a href="https://www.youtube.com/watch?v=G5pQcKoZ1Yw" class="yt-link">
+      <div class="yt-icon" style="background:#1a8a5a;"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">なるねぇ — 痩せる朝ストレッチ ⭐️出張メイン</div>
+        <div class="yt-sub">3分で完結 ／ どこでもできる</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+    <a href="https://www.youtube.com/watch?v=n6zQZzBEb6U" class="yt-link">
+      <div class="yt-icon" style="background:#1a8a5a;"><svg viewBox="0 0 24 24"><path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/></svg></div>
+      <div class="yt-info">
+        <div class="yt-name">ひなちゃんねる — 代謝爆上げストレッチ</div>
+        <div class="yt-sub">余裕ある朝 ／ 消費カロリーUP</div>
+      </div>
+      <div class="yt-arrow">›</div>
+    </a>
+  </div>
+
+</div><!-- end content-grid -->
+
+</div>
+
+<script>
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(name).classList.add('active');
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+</script>
+</div><!-- end app-wrapper -->
+</body>
+</html>
