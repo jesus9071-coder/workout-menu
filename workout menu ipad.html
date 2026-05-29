@@ -35,36 +35,18 @@
     padding-bottom: 40px;
   }
 
-  /* iPad レイアウト */
-  .app-wrapper {
-    max-width: 1024px;
-    margin: 0 auto;
-  }
-
+  /* iPad対応 */
   @media (min-width: 768px) {
-    .header { padding: 40px 40px 28px; }
-    .header-title { font-size: 36px; }
+    body { font-size: 16px; }
+    .header { padding: 48px 48px 28px; }
+    .header-title { font-size: 34px; }
     .header-sub { font-size: 14px; }
-    .weight-badge { font-size: 16px; padding: 8px 20px; }
-    .tabs { padding: 20px 40px 0; gap: 16px; }
+    .weight-badge { font-size: 15px; padding: 8px 20px; }
+    .tabs { padding: 20px 48px 0; gap: 16px; }
     .tab { font-size: 16px; padding: 14px 0; }
-    .panel { display: none !important; padding: 24px 40px 0; }
-    .panel.active { display: block !important; }
-    .content-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .content-grid-3 {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 16px;
-    }
-    .day-section { margin-bottom: 0; }
-    .yt-section { margin-bottom: 0; }
+    .panel { padding: 24px 48px 0; }
     .ex-name { font-size: 16px; }
     .ex-detail { font-size: 13px; }
-    .ex-kcal { font-size: 15px; }
     .yt-name { font-size: 15px; }
     .yt-sub { font-size: 13px; }
     .yt-icon { width: 44px; height: 44px; }
@@ -73,14 +55,8 @@
     .rule-text { font-size: 15px; }
     .goal-grid { grid-template-columns: repeat(4, 1fr); }
     .goal-value { font-size: 28px; }
-    .section-spacer { margin-bottom: 20px; }
-  }
-
-  @media (min-width: 1024px) {
-    .header { padding: 48px 60px 32px; }
-    .tabs { padding: 20px 60px 0; }
-    .panel { display: none !important; padding: 28px 60px 0; }
-    .panel.active { display: block !important; }
+    .day-section { margin-bottom: 20px; }
+    .yt-section { margin-bottom: 20px; }
   }
 
   /* header */
@@ -162,8 +138,8 @@
   .tab svg { width: 16px; height: 16px; }
 
   /* panels */
-  .panel { display: none !important; padding: 16px 16px 0; }
-  .panel.active { display: block !important; }
+  .panel { display: none; padding: 16px 16px 0; }
+  .panel.active { display: block; }
 
   /* day section */
   .day-section {
@@ -361,7 +337,6 @@
   </div>
 </div>
 
-<div class="app-wrapper">
 <div class="tabs">
   <button class="tab active" onclick="switchTab('home', this)">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
@@ -375,7 +350,7 @@
 
 <!-- 自宅パネル -->
 <div id="home" class="panel active">
-<div class="content-grid section-spacer">
+
   <!-- 月水金 -->
   <div class="day-section">
     <div class="day-header" style="background: rgba(79,156,249,0.08);">
@@ -534,9 +509,8 @@
       </div>
     </div>
   </div>
-</div><!-- end content-grid -->
 
-<div class="content-grid section-spacer">
+  <!-- YouTube links -->
   <div class="yt-section">
     <div class="yt-header">筋トレ動画</div>
     <a href="https://www.youtube.com/watch?v=hMgcaYd2BZM&t=375s" class="yt-link">
@@ -630,7 +604,6 @@
 <!-- 出張パネル -->
 <div id="travel" class="panel">
 
-<div class="content-grid section-spacer">
   <div class="day-section">
     <div class="day-header" style="background: rgba(62,207,142,0.08);">
       <div class="day-title">朝トレ（ホテル）</div>
@@ -741,9 +714,6 @@
   </div>
 
   <!-- YouTube links 出張 -->
-</div><!-- end content-grid -->
-
-<div class="content-grid section-spacer">
   <div class="yt-section">
     <div class="yt-header">筋トレ動画（出張用）</div>
     <a href="https://www.youtube.com/watch?v=ckQah7rYqaw" class="yt-link">
@@ -784,33 +754,29 @@
     </a>
   </div>
 
-</div><!-- end content-grid -->
-
 </div>
 
 <script>
 function switchTab(name, btn) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => {
+  document.querySelectorAll('.panel').forEach(function(p) {
     p.classList.remove('active');
-    p.style.display = 'none';
+    p.style.setProperty('display', 'none', 'important');
   });
   btn.classList.add('active');
   var target = document.getElementById(name);
   target.classList.add('active');
-  target.style.display = 'block';
+  target.style.setProperty('display', 'block', 'important');
   window.scrollTo({top: 0, behavior: 'smooth'});
 }
 
-window.addEventListener('DOMContentLoaded', function() {
-  document.querySelectorAll('.panel').forEach(p => {
-    p.style.display = 'none';
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.panel').forEach(function(p) {
+    p.style.setProperty('display', 'none', 'important');
   });
   var home = document.getElementById('home');
-  home.style.display = 'block';
-  home.classList.add('active');
+  home.style.setProperty('display', 'block', 'important');
 });
 </script>
-</div><!-- end app-wrapper -->
 </body>
 </html>
