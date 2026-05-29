@@ -48,7 +48,8 @@
     .weight-badge { font-size: 16px; padding: 8px 20px; }
     .tabs { padding: 20px 40px 0; gap: 16px; }
     .tab { font-size: 16px; padding: 14px 0; }
-    .panel { padding: 24px 40px 0; }
+    .panel { display: none !important; padding: 24px 40px 0; }
+    .panel.active { display: block !important; }
     .content-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -160,8 +161,8 @@
   .tab svg { width: 16px; height: 16px; }
 
   /* panels */
-  .panel { display: none; padding: 16px 16px 0; }
-  .panel.active { display: block; }
+  .panel { display: none !important; padding: 16px 16px 0; }
+  .panel.active { display: block !important; }
 
   /* day section */
   .day-section {
